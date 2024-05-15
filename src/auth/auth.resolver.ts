@@ -30,6 +30,7 @@ export class AuthResolver {
 
   @Mutation(() => User)
   async register(@Args('authInput') authInput: AuthInput): Promise<User> {
+    //Todo: Check whether user exists with that email first.
     return this.userService.create({ ...authInput });
   }
 }
