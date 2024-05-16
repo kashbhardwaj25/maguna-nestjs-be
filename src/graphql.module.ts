@@ -8,6 +8,7 @@ import { GraphQLModule as NestJsGraphQLModule } from '@nestjs/graphql';
     NestJsGraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       typePaths: ['./**/*.graphql'], // Path to your GraphQL schema file
+      playground: true,
       definitions: {
         path: join(process.cwd(), 'src/graphql.ts'), // Generated TypeScript definitions
         outputAs: 'class',

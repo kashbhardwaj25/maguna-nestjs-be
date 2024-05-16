@@ -21,7 +21,8 @@ export class AuthResolver {
     if (!user) {
       throw new Error('Invalid credentials');
     }
-    const token = await this.authService.login(user);
+    const token = await this.authService.generateToken(user);
+
     return {
       user,
       accessToken: token.access_token,
@@ -29,8 +30,19 @@ export class AuthResolver {
   }
 
   @Mutation(() => User)
-  async register(@Args('authInput') authInput: AuthInput): Promise<User> {
+  async register(@Args('input') authInput: AuthInput): Promise<AuthResponse> {
     //Todo: Check whether user exists with that email first.
-    return this.userService.create({ ...authInput });
+
+    const user = await this.userService.create({ ...authInput });
+
+    const token = await this.authService.generateToken({
+      email: user.email,
+      id: user.id,
+    });
+
+    return {
+      user,
+      accessToken: token.access_token,
+    };
   }
 }
