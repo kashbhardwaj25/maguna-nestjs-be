@@ -14,16 +14,13 @@ export class AuthService {
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.findOneByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user;
-      return result;
+      return user;
     }
     return null;
   }
 
   async generateToken(user: any) {
     const payload = { email: user.email, sub: user.id };
-
-    const token = this.jwtService.sign(payload);
 
     return {
       access_token: this.jwtService.sign(payload),

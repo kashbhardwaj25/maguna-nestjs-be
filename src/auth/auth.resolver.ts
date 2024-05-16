@@ -1,5 +1,6 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
+import { LoginInput } from 'src/graphql';
 import { User } from '../users/user.model';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
@@ -20,7 +21,7 @@ export class AuthResolver {
   ) {}
 
   @Mutation(() => AuthResponse)
-  async login(@Args('authInput') authInput: AuthInput): Promise<AuthResponse> {
+  async login(@Args('input') authInput: LoginInput): Promise<AuthResponse> {
     try {
       const user = await this.authService.validateUser(
         authInput.email,
