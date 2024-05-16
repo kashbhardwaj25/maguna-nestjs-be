@@ -8,9 +8,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export class CreateUserInput {
+export class LoginInput {
+    email: string;
+    password: string;
+}
+
+export class RegisterInput {
     name: string;
     email: string;
+    password: string;
 }
 
 export class User {
@@ -19,12 +25,19 @@ export class User {
     email: string;
 }
 
-export abstract class IQuery {
-    abstract users(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
+export class AuthResponse {
+    accessToken: string;
+    user: User;
 }
 
 export abstract class IMutation {
-    abstract createUser(input?: Nullable<CreateUserInput>): Nullable<User> | Promise<Nullable<User>>;
+    abstract login(input?: Nullable<LoginInput>): AuthResponse | Promise<AuthResponse>;
+
+    abstract register(input?: Nullable<RegisterInput>): AuthResponse | Promise<AuthResponse>;
+}
+
+export abstract class IQuery {
+    abstract users(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
 }
 
 type Nullable<T> = T | null;

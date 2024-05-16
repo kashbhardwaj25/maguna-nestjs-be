@@ -8,5 +8,6 @@ import { UsersResolver } from './users.resolver';
 @Module({
   imports: [SequelizeModule.forFeature([User])],
   providers: [UsersService, UsersResolver],
+  exports: [UsersService],
 })
 export class UsersModule {}
