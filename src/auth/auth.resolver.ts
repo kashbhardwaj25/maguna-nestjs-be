@@ -1,9 +1,16 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
+
 import { User } from '../users/user.model';
 import { AuthInput } from './dto/auth.input';
+import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
+import { UsersService } from '../users/users.service';
+import { getErrorCodeAndMessage } from 'src/utils/helpers';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  InvalidCredentials,
+  UserWithEmailAlreadyExists,
+} from 'src/utils/errors';
 
 @Resolver()
 export class AuthResolver {
@@ -14,35 +21,57 @@ export class AuthResolver {
 
   @Mutation(() => AuthResponse)
   async login(@Args('authInput') authInput: AuthInput): Promise<AuthResponse> {
-    const user = await this.authService.validateUser(
-      authInput.email,
-      authInput.password,
-    );
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-    const token = await this.authService.generateToken(user);
+    try {
+      const user = await this.authService.validateUser(
+        authInput.email,
+        authInput.password,
+      );
 
-    return {
-      user,
-      accessToken: token.access_token,
-    };
+      if (!user) {
+        throw new InvalidCredentials();
+      }
+
+      const token = await this.authService.generateToken(user);
+
+      return {
+        user,
+        accessToken: token.access_token,
+      };
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   @Mutation(() => User)
   async register(@Args('input') authInput: AuthInput): Promise<AuthResponse> {
-    //Todo: Check whether user exists with that email first.
+    try {
+      const existingUser = await this.userService.findOneByEmail(
+        authInput.email,
+      );
 
-    const user = await this.userService.create({ ...authInput });
+      if (existingUser) {
+        throw new UserWithEmailAlreadyExists();
+      }
 
-    const token = await this.authService.generateToken({
-      email: user.email,
-      id: user.id,
-    });
+      const newlyCreatedUser = await this.userService.create({ ...authInput });
 
-    return {
-      user,
-      accessToken: token.access_token,
-    };
+      const token = await this.authService.generateToken({
+        email: newlyCreatedUser.email,
+        id: newlyCreatedUser.id,
+      });
+
+      return {
+        user: newlyCreatedUser,
+        accessToken: token.access_token,
+      };
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

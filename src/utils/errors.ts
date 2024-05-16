@@ -11,3 +11,15 @@ export class UserWithEmailAlreadyExists extends HttpException {
     );
   }
 }
+
+export class InvalidCredentials extends HttpException {
+  constructor() {
+    super(
+      {
+        message: 'Invalid Credentials.',
+        code: 'INVALID_CREDENTIALS',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
