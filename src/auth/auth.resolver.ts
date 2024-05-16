@@ -1,17 +1,16 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
+import {
+  InvalidCredentials,
+  UserWithEmailAlreadyExists,
+} from 'src/utils/errors';
 import { LoginInput } from 'src/graphql';
-import { User } from '../users/user.model';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import {
-  InvalidCredentials,
-  UserWithEmailAlreadyExists,
-} from 'src/utils/errors';
 
 @Resolver()
 export class AuthResolver {
@@ -46,7 +45,7 @@ export class AuthResolver {
     }
   }
 
-  @Mutation(() => User)
+  @Mutation(() => AuthResponse)
   async register(@Args('input') authInput: AuthInput): Promise<AuthResponse> {
     try {
       const existingUser = await this.userService.findOneByEmail(
