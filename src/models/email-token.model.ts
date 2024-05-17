@@ -6,8 +6,11 @@ import {
   Table,
 } from 'sequelize-typescript';
 
-@Table
-export class User extends Model {
+@Table({
+  tableName: 'email_tokens',
+  underscored: true,
+})
+export class EmailToken extends Model {
   @PrimaryKey
   @Column({
     type: DataType.UUID,
@@ -16,11 +19,8 @@ export class User extends Model {
   id: string;
 
   @Column
-  name: string;
+  verificationToken: string;
 
   @Column
-  email: string;
-
-  @Column
-  password: string;
+  userId: string;
 }

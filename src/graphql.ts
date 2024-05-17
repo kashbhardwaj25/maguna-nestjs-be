@@ -34,6 +34,8 @@ export abstract class IMutation {
     abstract login(input?: Nullable<LoginInput>): AuthResponse | Promise<AuthResponse>;
 
     abstract register(input?: Nullable<RegisterInput>): AuthResponse | Promise<AuthResponse>;
+
+    abstract verifyEmail(token?: Nullable<string>): string | Promise<string>;
 }
 
 export abstract class IQuery {

@@ -1,17 +1,18 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
+import {
+  InvalidCredentials,
+  InvalidTokenProvided,
+  UserWithEmailAlreadyExists,
+  EmailVerificationTokenExpired,
+} from 'src/utils/errors';
 import { LoginInput } from 'src/graphql';
-import { User } from '../users/user.model';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import {
-  InvalidCredentials,
-  UserWithEmailAlreadyExists,
-} from 'src/utils/errors';
 
 @Resolver()
 export class AuthResolver {
@@ -46,7 +47,7 @@ export class AuthResolver {
     }
   }
 
-  @Mutation(() => User)
+  @Mutation(() => AuthResponse)
   async register(@Args('input') authInput: AuthInput): Promise<AuthResponse> {
     try {
       const existingUser = await this.userService.findOneByEmail(
@@ -59,6 +60,19 @@ export class AuthResolver {
 
       const newlyCreatedUser = await this.userService.create({ ...authInput });
 
+      const verificationToken =
+        await this.authService.createVerificationToken();
+
+      await this.authService.sendVerificationEmail(
+        newlyCreatedUser.email,
+        verificationToken,
+      );
+
+      await this.authService.saveEmailVerificationTokenInTable(
+        verificationToken,
+        newlyCreatedUser.id,
+      );
+
       const token = await this.authService.generateToken({
         email: newlyCreatedUser.email,
         id: newlyCreatedUser.id,
@@ -68,6 +82,45 @@ export class AuthResolver {
         user: newlyCreatedUser,
         accessToken: token.access_token,
       };
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Mutation(() => String)
+  async verifyEmail(@Args('token') token: string): Promise<String> {
+    try {
+      const tokenDetails =
+        await this.authService.findOneByVerificationToken(token);
+
+      if (!tokenDetails) {
+        throw new InvalidTokenProvided();
+      }
+
+      const tokenAgeInMinutes =
+        (new Date().getTime() - new Date(tokenDetails.createdAt).getTime()) /
+        1000 /
+        60;
+
+      if (tokenAgeInMinutes > 10) {
+        throw new EmailVerificationTokenExpired();
+      }
+
+      const user = await this.userService.findOne(tokenDetails.userId);
+
+      await this.userService.update(
+        {
+          id: user.id,
+        },
+        {
+          isEmailVerified: true,
+        },
+      );
+
+      return 'Email verification is successful!';
     } catch (error) {
       throw new HttpException(
         getErrorCodeAndMessage(error),
