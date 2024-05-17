@@ -57,8 +57,6 @@ export class AuthService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    // Implement email sending logic here
-    // Example: sendEmail(email, `Your verification token is: ${token}`);
     await this.emailService.sendEmail(
       email,
       'Verify your email.',
