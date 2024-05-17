@@ -2,6 +2,7 @@ require('dotenv').config();
 
 export const config = {
   jwtSecret: process.env.JWT_SECRET,
+  sendGridApiKey: process.env.SENDGRID_API_KEY,
 
   database: {
     dialect: process.env.DB_DIALECT,
