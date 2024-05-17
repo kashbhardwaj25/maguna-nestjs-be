@@ -1,20 +1,22 @@
+import { Dialect } from 'sequelize';
 import { Module } from '@nestjs/common';
 import { SequelizeModule as NestJsSequelizeModule } from '@nestjs/sequelize';
 
+import { config } from './config';
 import { User } from './users/user.model';
 
 @Module({
   imports: [
     NestJsSequelizeModule.forRoot({
-      dialect: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'maguna_db',
-      models: [User], // Include all models here
-      autoLoadModels: true, // Automatically load models
-      synchronize: true, // Synchronize models with the database (not recommended for production)
+      dialect: config.database.dialect as Dialect,
+      host: config.database.host,
+      port: parseInt(config.database.port),
+      username: config.database.username,
+      password: config.database.password,
+      database: config.database.database,
+      models: [User],
+      autoLoadModels: true,
+      synchronize: true,
     }),
   ],
 })
