@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
@@ -75,6 +76,19 @@ export class AuthService {
   async removeEmailToken(condition = {}) {
     return this.emailTokenModel.destroy({
       where: condition,
+      force: true,
+    });
+  }
+
+  async removeExpiredEmailVerificationTokens() {
+    const now = new Date();
+
+    await this.emailTokenModel.destroy({
+      where: {
+        expiresAt: {
+          [Op.lt]: now,
+        },
+      },
       force: true,
     });
   }
