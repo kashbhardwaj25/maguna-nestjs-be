@@ -6,7 +6,10 @@ import {
   Table,
 } from 'sequelize-typescript';
 
-@Table
+@Table({
+  tableName: 'users',
+  underscored: true,
+})
 export class User extends Model {
   @PrimaryKey
   @Column({
@@ -20,6 +23,13 @@ export class User extends Model {
 
   @Column
   email: string;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  isEmailVerified: boolean;
 
   @Column
   password: string;

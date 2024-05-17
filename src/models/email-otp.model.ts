@@ -6,7 +6,10 @@ import {
   Table,
 } from 'sequelize-typescript';
 
-@Table
+@Table({
+  tableName: 'email_otps',
+  underscored: true,
+})
 export class EmailOtp extends Model {
   @PrimaryKey
   @Column({
