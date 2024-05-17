@@ -1,6 +1,7 @@
 import * as sgMail from '@sendgrid/mail';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 import { config } from 'src/config';
 
 @Injectable()
