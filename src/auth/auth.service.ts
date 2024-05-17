@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 
-import { User } from 'src/models/user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { UsersService } from '../users/users.service';
 import { EmailToken } from 'src/models/email-token.model';
+import { EmailService } from 'src/services/sendgrid.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +15,7 @@ export class AuthService {
     private emailTokenModel: typeof EmailToken,
     private jwtService: JwtService,
     private userService: UsersService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {

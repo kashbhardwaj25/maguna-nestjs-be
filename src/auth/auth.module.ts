@@ -10,6 +10,7 @@ import { UsersModule } from '../users/users.module';
 import { EmailToken } from 'src/models/email-token.model';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { LocalStrategy } from './strategies/local-strategy';
+import { EmailService } from 'src/services/sendgrid.service';
 
 @Module({
   imports: [
@@ -21,6 +22,12 @@ import { LocalStrategy } from './strategies/local-strategy';
       signOptions: { expiresIn: '60m' },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, AuthResolver],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    AuthResolver,
+    EmailService,
+    LocalStrategy,
+  ],
 })
 export class AuthModule {}
