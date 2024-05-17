@@ -99,7 +99,11 @@ export class AuthResolver {
         throw new InvalidTokenProvided();
       }
 
+      // TODO: Check if token is past its expiry here. If yes, throw an error.
+
       const user = await this.userService.findOne(tokenDetails.userId);
+
+      // TODO: Update the isEmailVerified column for that user.
 
       const jwtToken = await this.authService.generateToken({
         email: user.email,
