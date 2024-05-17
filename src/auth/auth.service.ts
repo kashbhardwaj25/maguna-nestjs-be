@@ -2,8 +2,8 @@ import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
-
 import { InjectModel } from '@nestjs/sequelize';
+
 import { UsersService } from '../users/users.service';
 import { EmailToken } from 'src/models/email-token.model';
 import { EmailService } from 'src/services/sendgrid.service';
@@ -59,5 +59,10 @@ export class AuthService {
   async sendVerificationEmail(email: string, token: string) {
     // Implement email sending logic here
     // Example: sendEmail(email, `Your verification token is: ${token}`);
+    await this.emailService.sendEmail(
+      email,
+      'Verify your email.',
+      `<strong>Click this link to verify your email: http://localhost:3011/verify-email?token=${token}<strong>`,
+    );
   }
 }
