@@ -46,6 +46,14 @@ export class AuthService {
     });
   }
 
+  async findVerificationTokenByUserId(
+    userId: string,
+  ): Promise<EmailToken | undefined> {
+    return this.emailTokenModel.findOne({
+      where: { userId },
+    });
+  }
+
   async saveEmailVerificationTokenInTable(
     token: string,
     userId: string,
@@ -62,5 +70,12 @@ export class AuthService {
       'Verify your email.',
       `<strong>Click this link to verify your email: http://localhost:3011/verify-email?token=${token}<strong>`,
     );
+  }
+
+  async removeEmailToken(condition = {}) {
+    return this.emailTokenModel.destroy({
+      where: condition,
+      force: true,
+    });
   }
 }

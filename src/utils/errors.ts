@@ -47,3 +47,15 @@ export class EmailVerificationTokenExpired extends HttpException {
     );
   }
 }
+
+export class InvalidUser extends HttpException {
+  constructor() {
+    super(
+      {
+        message: 'Bad Auth Token Provided',
+        code: 'INVALID_USER',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
