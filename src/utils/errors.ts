@@ -23,3 +23,15 @@ export class InvalidCredentials extends HttpException {
     );
   }
 }
+
+export class InvalidTokenProvided extends HttpException {
+  constructor() {
+    super(
+      {
+        message: 'Invalid Token Provided.',
+        code: 'INVALID_TOKEN_PROVIDED',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

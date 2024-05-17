@@ -7,10 +7,10 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'email_otps',
+  tableName: 'email_tokens',
   underscored: true,
 })
-export class EmailOtp extends Model {
+export class EmailToken extends Model {
   @PrimaryKey
   @Column({
     type: DataType.UUID,
@@ -19,7 +19,7 @@ export class EmailOtp extends Model {
   id: string;
 
   @Column
-  otp: number;
+  verificationToken: string;
 
   @Column
   userId: string;

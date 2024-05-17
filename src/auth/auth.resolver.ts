@@ -2,6 +2,7 @@ import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
 import {
   InvalidCredentials,
+  InvalidTokenProvided,
   UserWithEmailAlreadyExists,
 } from 'src/utils/errors';
 import { LoginInput } from 'src/graphql';
@@ -58,6 +59,16 @@ export class AuthResolver {
 
       const newlyCreatedUser = await this.userService.create({ ...authInput });
 
+      const verificationToken =
+        await this.authService.createVerificationToken();
+
+      await this.authService.sendVerificationEmail(
+        newlyCreatedUser.email,
+        verificationToken,
+      );
+
+      // TODO: Add the verification token in the email tokens table here
+
       const token = await this.authService.generateToken({
         email: newlyCreatedUser.email,
         id: newlyCreatedUser.id,
@@ -66,6 +77,35 @@ export class AuthResolver {
       return {
         user: newlyCreatedUser,
         accessToken: token.access_token,
+      };
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Mutation(() => AuthResponse)
+  async verifyEmail(@Args('token') token: string): Promise<AuthResponse> {
+    try {
+      const tokenDetails =
+        await this.authService.findOneByVerificationToken(token);
+
+      if (!tokenDetails) {
+        throw new InvalidTokenProvided();
+      }
+
+      const user = await this.userService.findOne(tokenDetails.userId);
+
+      const jwtToken = await this.authService.generateToken({
+        email: user.email,
+        id: user.id,
+      });
+
+      return {
+        user,
+        accessToken: jwtToken.access_token,
       };
     } catch (error) {
       throw new HttpException(

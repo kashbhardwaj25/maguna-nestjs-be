@@ -10,6 +10,9 @@ export class UsersService {
     @InjectModel(User)
     private userModel: typeof User,
   ) {}
+  async findOne(id: string): Promise<User | undefined> {
+    return this.userModel.findOne({ where: { id } });
+  }
 
   async findOneByEmail(email: string): Promise<User | undefined> {
     return this.userModel.findOne({ where: { email } });
@@ -23,6 +26,5 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(password, 10);
     return this.userModel.create({ name, email, password: hashedPassword });
   }
-
   // Additional methods can be added here, such as findById, update, delete, etc.
 }

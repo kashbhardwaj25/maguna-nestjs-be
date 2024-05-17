@@ -7,7 +7,7 @@ import { config } from 'src/config';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
-import { EmailOtp } from 'src/models/email-otp.model';
+import { EmailToken } from 'src/models/email-token.model';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { LocalStrategy } from './strategies/local-strategy';
 
@@ -15,7 +15,7 @@ import { LocalStrategy } from './strategies/local-strategy';
   imports: [
     UsersModule,
     PassportModule,
-    SequelizeModule.forFeature([EmailOtp]),
+    SequelizeModule.forFeature([EmailToken]),
     JwtModule.register({
       secret: config.jwtSecret,
       signOptions: { expiresIn: '60m' },
