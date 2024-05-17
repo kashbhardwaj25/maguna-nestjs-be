@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
+import { EMAIL_VERIFICATION_TOKEN_EXPIRY } from 'src/utils/constants';
 
 @Resolver()
 export class AuthResolver {
@@ -105,7 +106,7 @@ export class AuthResolver {
         1000 /
         60;
 
-      if (tokenAgeInMinutes > 10) {
+      if (tokenAgeInMinutes > EMAIL_VERIFICATION_TOKEN_EXPIRY) {
         throw new EmailVerificationTokenExpired();
       }
 
