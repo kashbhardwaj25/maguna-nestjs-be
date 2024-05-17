@@ -24,4 +24,5 @@ type Mutation {
   login(input: LoginInput): AuthResponse!
   register(input: RegisterInput): AuthResponse!
   verifyEmail(token: String): String!
+  resendVerificationEmail: String!
 }

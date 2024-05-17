@@ -10,6 +10,7 @@ import {
 import { LoginInput } from 'src/graphql';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './auth.decorator';
 import { AuthResponse } from './dto/auth.response';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { UsersService } from '../users/users.service';
@@ -132,43 +133,39 @@ export class AuthResolver {
     }
   }
 
-  // @Mutation(() => String)
-  // @UseGuards(JwtAuthGuard)
-  // async resendVerificationEmail(@Args('token') token: string): Promise<String> {
-  //   try {
-  //     const tokenDetails =
-  //       await this.authService.findOneByVerificationToken(token);
+  @Mutation(() => String)
+  @UseGuards(JwtAuthGuard)
+  async resendVerificationEmail(
+    @CurrentUser() currentUser: any,
+  ): Promise<String> {
+    try {
+      const tokenDetails = await this.authService.findVerificationTokenByUserId(
+        currentUser.userId,
+      );
 
-  //     if (!tokenDetails) {
-  //       throw new InvalidTokenProvided();
-  //     }
+      if (tokenDetails) {
+        await this.authService.removeEmailToken({ userId: currentUser.userId });
+      }
 
-  //     const tokenAgeInMinutes =
-  //       (new Date().getTime() - new Date(tokenDetails.createdAt).getTime()) /
-  //       1000 /
-  //       60;
+      const verificationToken =
+        await this.authService.createVerificationToken();
 
-  //     if (tokenAgeInMinutes > EMAIL_VERIFICATION_TOKEN_EXPIRY) {
-  //       throw new EmailVerificationTokenExpired();
-  //     }
+      await this.authService.sendVerificationEmail(
+        currentUser.email,
+        verificationToken,
+      );
 
-  //     const user = await this.userService.findOne(tokenDetails.userId);
+      await this.authService.saveEmailVerificationTokenInTable(
+        verificationToken,
+        currentUser.userId,
+      );
 
-  //     await this.userService.update(
-  //       {
-  //         id: user.id,
-  //       },
-  //       {
-  //         isEmailVerified: true,
-  //       },
-  //     );
-
-  //     return 'Email verification is successful!';
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       getErrorCodeAndMessage(error),
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  // }
+      return 'Verification email is sent again!';
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }
