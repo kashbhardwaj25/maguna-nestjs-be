@@ -111,7 +111,14 @@ export class AuthResolver {
 
       const user = await this.userService.findOne(tokenDetails.userId);
 
-      // TODO: Update the isEmailVerified column for that user.
+      await this.userService.update(
+        {
+          id: user.id,
+        },
+        {
+          isEmailVerified: true,
+        },
+      );
 
       return 'Email verification is successful!';
     } catch (error) {

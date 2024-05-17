@@ -18,6 +18,12 @@ export class UsersService {
     return this.userModel.findOne({ where: { email } });
   }
 
+  async update(condition = {}, payload = {}) {
+    return this.userModel.update(payload, {
+      where: condition,
+    });
+  }
+
   async findAll(): Promise<User[]> {
     return this.userModel.findAll();
   }
