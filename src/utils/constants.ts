@@ -1,0 +1,1 @@
+export const EMAIL_VERIFICATION_TOKEN_EXPIRY = 10;
