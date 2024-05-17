@@ -1,16 +1,17 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import {
+  InvalidUser,
   InvalidCredentials,
   InvalidTokenProvided,
   UserWithEmailAlreadyExists,
   EmailVerificationTokenExpired,
 } from 'src/utils/errors';
-import { LoginInput } from 'src/graphql';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './auth.decorator';
+import { LoginInput, User } from 'src/graphql';
 import { AuthResponse } from './dto/auth.response';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { UsersService } from '../users/users.service';
@@ -161,6 +162,25 @@ export class AuthResolver {
       );
 
       return 'Verification email is sent again!';
+    } catch (error) {
+      throw new HttpException(
+        getErrorCodeAndMessage(error),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Query('me')
+  async whoAmI(@CurrentUser() currentUser: any): Promise<User> {
+    try {
+      const user = await this.userService.findOne(currentUser.userId);
+
+      if (!user) {
+        throw new InvalidUser();
+      }
+
+      return user;
     } catch (error) {
       throw new HttpException(
         getErrorCodeAndMessage(error),
