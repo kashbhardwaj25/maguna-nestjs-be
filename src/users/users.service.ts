@@ -2,8 +2,7 @@ import * as bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-import { User } from './user.model';
-import { CreateUserInput } from './dto/create-user.input';
+import { User } from '../models/user.model';
 
 @Injectable()
 export class UsersService {

@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule as NestJsSequelizeModule } from '@nestjs/sequelize';
 
 import { config } from './config';
-import { User } from './users/user.model';
+import { User } from './models/user.model';
 
 @Module({
   imports: [
