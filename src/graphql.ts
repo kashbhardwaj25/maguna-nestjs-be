@@ -30,6 +30,12 @@ export class AuthResponse {
     user: User;
 }
 
+export abstract class IQuery {
+    abstract me(): User | Promise<User>;
+
+    abstract users(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
+}
+
 export abstract class IMutation {
     abstract login(input?: Nullable<LoginInput>): AuthResponse | Promise<AuthResponse>;
 
@@ -38,10 +44,6 @@ export abstract class IMutation {
     abstract verifyEmail(token?: Nullable<string>): string | Promise<string>;
 
     abstract resendVerificationEmail(): string | Promise<string>;
-}
-
-export abstract class IQuery {
-    abstract users(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
 }
 
 type Nullable<T> = T | null;
