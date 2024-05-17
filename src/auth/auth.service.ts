@@ -45,6 +45,16 @@ export class AuthService {
     });
   }
 
+  async saveEmailVerificationTokenInTable(
+    token: string,
+    userId: string,
+  ): Promise<EmailToken | undefined> {
+    return this.emailTokenModel.create({
+      verificationToken: token,
+      userId,
+    });
+  }
+
   async sendVerificationEmail(email: string, token: string) {
     // Implement email sending logic here
     // Example: sendEmail(email, `Your verification token is: ${token}`);

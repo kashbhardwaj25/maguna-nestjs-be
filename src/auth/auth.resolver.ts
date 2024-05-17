@@ -67,7 +67,10 @@ export class AuthResolver {
         verificationToken,
       );
 
-      // TODO: Add the verification token in the email tokens table here
+      await this.authService.saveEmailVerificationTokenInTable(
+        verificationToken,
+        newlyCreatedUser.id,
+      );
 
       const token = await this.authService.generateToken({
         email: newlyCreatedUser.email,
