@@ -1,5 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import {
   InvalidCredentials,
@@ -11,6 +11,7 @@ import { LoginInput } from 'src/graphql';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
+import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
 import { EMAIL_VERIFICATION_TOKEN_EXPIRY } from 'src/utils/constants';
@@ -92,6 +93,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => String)
+  @UseGuards(JwtAuthGuard)
   async verifyEmail(@Args('token') token: string): Promise<String> {
     try {
       const tokenDetails =
@@ -129,4 +131,44 @@ export class AuthResolver {
       );
     }
   }
+
+  // @Mutation(() => String)
+  // @UseGuards(JwtAuthGuard)
+  // async resendVerificationEmail(@Args('token') token: string): Promise<String> {
+  //   try {
+  //     const tokenDetails =
+  //       await this.authService.findOneByVerificationToken(token);
+
+  //     if (!tokenDetails) {
+  //       throw new InvalidTokenProvided();
+  //     }
+
+  //     const tokenAgeInMinutes =
+  //       (new Date().getTime() - new Date(tokenDetails.createdAt).getTime()) /
+  //       1000 /
+  //       60;
+
+  //     if (tokenAgeInMinutes > EMAIL_VERIFICATION_TOKEN_EXPIRY) {
+  //       throw new EmailVerificationTokenExpired();
+  //     }
+
+  //     const user = await this.userService.findOne(tokenDetails.userId);
+
+  //     await this.userService.update(
+  //       {
+  //         id: user.id,
+  //       },
+  //       {
+  //         isEmailVerified: true,
+  //       },
+  //     );
+
+  //     return 'Email verification is successful!';
+  //   } catch (error) {
+  //     throw new HttpException(
+  //       getErrorCodeAndMessage(error),
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  // }
 }
