@@ -35,3 +35,15 @@ export class InvalidTokenProvided extends HttpException {
     );
   }
 }
+
+export class EmailVerificationTokenExpired extends HttpException {
+  constructor() {
+    super(
+      {
+        message: 'The email verification token has expired.',
+        code: 'EMAIL_VERIFICATION_TOKEN_EXPIRED',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}

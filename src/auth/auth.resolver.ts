@@ -1,9 +1,11 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 import {
   InvalidCredentials,
   InvalidTokenProvided,
   UserWithEmailAlreadyExists,
+  EmailVerificationTokenExpired,
 } from 'src/utils/errors';
 import { LoginInput } from 'src/graphql';
 import { AuthInput } from './dto/auth.input';
@@ -11,7 +13,6 @@ import { AuthService } from './auth.service';
 import { AuthResponse } from './dto/auth.response';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
-import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Resolver()
 export class AuthResolver {
@@ -89,8 +90,8 @@ export class AuthResolver {
     }
   }
 
-  @Mutation(() => AuthResponse)
-  async verifyEmail(@Args('token') token: string): Promise<AuthResponse> {
+  @Mutation(() => String)
+  async verifyEmail(@Args('token') token: string): Promise<String> {
     try {
       const tokenDetails =
         await this.authService.findOneByVerificationToken(token);
@@ -99,21 +100,20 @@ export class AuthResolver {
         throw new InvalidTokenProvided();
       }
 
-      // TODO: Check if token is past its expiry here. If yes, throw an error.
+      const tokenAgeInMinutes =
+        (new Date().getTime() - new Date(tokenDetails.createdAt).getTime()) /
+        1000 /
+        60;
+
+      if (tokenAgeInMinutes > 10) {
+        throw new EmailVerificationTokenExpired();
+      }
 
       const user = await this.userService.findOne(tokenDetails.userId);
 
       // TODO: Update the isEmailVerified column for that user.
 
-      const jwtToken = await this.authService.generateToken({
-        email: user.email,
-        id: user.id,
-      });
-
-      return {
-        user,
-        accessToken: jwtToken.access_token,
-      };
+      return 'Email verification is successful!';
     } catch (error) {
       throw new HttpException(
         getErrorCodeAndMessage(error),
