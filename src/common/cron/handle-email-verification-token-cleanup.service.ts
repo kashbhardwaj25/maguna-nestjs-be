@@ -4,7 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
-export class TokenCleanupService {
+export class ExpiredEmailTokenCleanupCronJob {
   constructor(private readonly authService: AuthService) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_10PM)
