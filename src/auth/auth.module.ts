@@ -29,5 +29,6 @@ import { EmailService } from 'src/services/sendgrid.service';
     EmailService,
     LocalStrategy,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

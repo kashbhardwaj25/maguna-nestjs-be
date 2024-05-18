@@ -172,7 +172,7 @@ export class AuthResolver {
 
   @UseGuards(JwtAuthGuard)
   @Query('me')
-  async whoAmI(@CurrentUser() currentUser: any): Promise<User> {
+  async me(@CurrentUser() currentUser: any): Promise<User> {
     try {
       const user = await this.userService.findOne(currentUser.userId);
 
