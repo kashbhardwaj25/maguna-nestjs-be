@@ -82,11 +82,12 @@ export class AuthService {
 
   async removeExpiredEmailVerificationTokens() {
     const now = new Date();
+    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     await this.emailTokenModel.destroy({
       where: {
-        expiresAt: {
-          [Op.lt]: now,
+        createdAt: {
+          [Op.lt]: tenMinutesAgo,
         },
       },
       force: true,
