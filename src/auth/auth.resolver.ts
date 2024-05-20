@@ -6,7 +6,7 @@ import {
   InvalidCredentials,
   InvalidTokenProvided,
   UserWithEmailAlreadyExists,
-  EmailVerificationTokenExpired,
+  EmailVerificationOTPExpired,
 } from 'src/utils/errors';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
@@ -16,7 +16,7 @@ import { AuthResponse } from './dto/auth.response';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { UsersService } from '../users/users.service';
 import { getErrorCodeAndMessage } from 'src/utils/helpers';
-import { EMAIL_VERIFICATION_TOKEN_EXPIRY } from 'src/utils/constants';
+import { EMAIL_VERIFICATION_OTP_EXPIRY } from 'src/utils/constants';
 
 @Resolver()
 export class AuthResolver {
@@ -64,16 +64,15 @@ export class AuthResolver {
 
       const newlyCreatedUser = await this.userService.create({ ...authInput });
 
-      const verificationToken =
-        await this.authService.createVerificationToken();
+      const verificationOTP = await this.authService.createVerificationOTP();
 
       await this.authService.sendVerificationEmail(
         newlyCreatedUser.email,
-        verificationToken,
+        verificationOTP,
       );
 
-      await this.authService.saveEmailVerificationTokenInTable(
-        verificationToken,
+      await this.authService.saveEmailVerificationOTPInTable(
+        verificationOTP,
         newlyCreatedUser.id,
       );
 
@@ -96,25 +95,24 @@ export class AuthResolver {
 
   @Mutation(() => String)
   @UseGuards(JwtAuthGuard)
-  async verifyEmail(@Args('token') token: string): Promise<String> {
+  async verifyEmail(@Args('otp') otp: number): Promise<String> {
     try {
-      const tokenDetails =
-        await this.authService.findOneByVerificationToken(token);
+      const otpDetails = await this.authService.findOneByVerificationOTP(otp);
 
-      if (!tokenDetails) {
+      if (!otpDetails) {
         throw new InvalidTokenProvided();
       }
 
-      const tokenAgeInMinutes =
-        (new Date().getTime() - new Date(tokenDetails.createdAt).getTime()) /
+      const otpAgeInMinutes =
+        (new Date().getTime() - new Date(otpDetails.createdAt).getTime()) /
         1000 /
         60;
 
-      if (tokenAgeInMinutes > EMAIL_VERIFICATION_TOKEN_EXPIRY) {
-        throw new EmailVerificationTokenExpired();
+      if (otpAgeInMinutes > EMAIL_VERIFICATION_OTP_EXPIRY) {
+        throw new EmailVerificationOTPExpired();
       }
 
-      const user = await this.userService.findOne(tokenDetails.userId);
+      const user = await this.userService.findOne(otpDetails.userId);
 
       await this.userService.update(
         {
@@ -140,24 +138,23 @@ export class AuthResolver {
     @CurrentUser() currentUser: any,
   ): Promise<String> {
     try {
-      const tokenDetails = await this.authService.findVerificationTokenByUserId(
+      const otpDetails = await this.authService.findVerificationOTPByUserId(
         currentUser.userId,
       );
 
-      if (tokenDetails) {
-        await this.authService.removeEmailToken({ userId: currentUser.userId });
+      if (otpDetails) {
+        await this.authService.removeEmailOTP({ userId: currentUser.userId });
       }
 
-      const verificationToken =
-        await this.authService.createVerificationToken();
+      const verificationOTP = await this.authService.createVerificationOTP();
 
       await this.authService.sendVerificationEmail(
         currentUser.email,
-        verificationToken,
+        verificationOTP,
       );
 
-      await this.authService.saveEmailVerificationTokenInTable(
-        verificationToken,
+      await this.authService.saveEmailVerificationOTPInTable(
+        verificationOTP,
         currentUser.userId,
       );
 

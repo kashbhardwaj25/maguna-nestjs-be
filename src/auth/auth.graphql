@@ -27,6 +27,6 @@ type Query {
 type Mutation {
   login(input: LoginInput): AuthResponse!
   register(input: RegisterInput): AuthResponse!
-  verifyEmail(token: String): String!
+  verifyEmail(otp: Int): String!
   resendVerificationEmail: String!
 }
