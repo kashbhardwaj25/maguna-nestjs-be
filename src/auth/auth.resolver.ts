@@ -6,7 +6,7 @@ import {
   InvalidCredentials,
   InvalidTokenProvided,
   UserWithEmailAlreadyExists,
-  EmailVerificationOTPExpired,
+  EmailVerificationOtpExpired,
 } from 'src/utils/errors';
 import { AuthInput } from './dto/auth.input';
 import { AuthService } from './auth.service';
@@ -64,15 +64,15 @@ export class AuthResolver {
 
       const newlyCreatedUser = await this.userService.create({ ...authInput });
 
-      const verificationOTP = await this.authService.createVerificationOTP();
+      const verificationOtp = await this.authService.createVerificationOtp();
 
       await this.authService.sendVerificationEmail(
         newlyCreatedUser.email,
-        verificationOTP,
+        verificationOtp,
       );
 
-      await this.authService.saveEmailVerificationOTPInTable(
-        verificationOTP,
+      await this.authService.saveEmailVerificationOtpInTable(
+        verificationOtp,
         newlyCreatedUser.id,
       );
 
@@ -97,7 +97,7 @@ export class AuthResolver {
   @UseGuards(JwtAuthGuard)
   async verifyEmail(@Args('otp') otp: number): Promise<String> {
     try {
-      const otpDetails = await this.authService.findOneByVerificationOTP(otp);
+      const otpDetails = await this.authService.findOneByVerificationOtp(otp);
 
       if (!otpDetails) {
         throw new InvalidTokenProvided();
@@ -109,7 +109,7 @@ export class AuthResolver {
         60;
 
       if (otpAgeInMinutes > EMAIL_VERIFICATION_OTP_EXPIRY) {
-        throw new EmailVerificationOTPExpired();
+        throw new EmailVerificationOtpExpired();
       }
 
       const user = await this.userService.findOne(otpDetails.userId);
@@ -138,7 +138,7 @@ export class AuthResolver {
     @CurrentUser() currentUser: any,
   ): Promise<String> {
     try {
-      const otpDetails = await this.authService.findVerificationOTPByUserId(
+      const otpDetails = await this.authService.findVerificationOtpByUserId(
         currentUser.userId,
       );
 
@@ -146,15 +146,15 @@ export class AuthResolver {
         await this.authService.removeEmailOTP({ userId: currentUser.userId });
       }
 
-      const verificationOTP = await this.authService.createVerificationOTP();
+      const verificationOtp = await this.authService.createVerificationOtp();
 
       await this.authService.sendVerificationEmail(
         currentUser.email,
-        verificationOTP,
+        verificationOtp,
       );
 
-      await this.authService.saveEmailVerificationOTPInTable(
-        verificationOTP,
+      await this.authService.saveEmailVerificationOtpInTable(
+        verificationOtp,
         currentUser.userId,
       );
 

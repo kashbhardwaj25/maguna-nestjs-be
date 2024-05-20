@@ -19,7 +19,7 @@ export class EmailOTP extends Model {
   id: string;
 
   @Column
-  verificationOTP: number;
+  verificationOtp: number;
 
   @Column
   userId: string;

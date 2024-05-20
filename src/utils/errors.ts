@@ -36,7 +36,7 @@ export class InvalidTokenProvided extends HttpException {
   }
 }
 
-export class EmailVerificationOTPExpired extends HttpException {
+export class EmailVerificationOtpExpired extends HttpException {
   constructor() {
     super(
       {
