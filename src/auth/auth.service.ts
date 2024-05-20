@@ -34,17 +34,17 @@ export class AuthService {
     };
   }
 
-  async createVerificationOTP() {
+  async createVerificationOtp() {
     return Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
   }
 
-  async findOneByVerificationOTP(otp: number): Promise<EmailOTP | undefined> {
+  async findOneByVerificationOtp(otp: number): Promise<EmailOTP | undefined> {
     return this.emailOTPModel.findOne({
-      where: { verificationOTP: otp },
+      where: { verificationOtp: otp },
     });
   }
 
-  async findVerificationOTPByUserId(
+  async findVerificationOtpByUserId(
     userId: string,
   ): Promise<EmailOTP | undefined> {
     return this.emailOTPModel.findOne({
@@ -52,12 +52,12 @@ export class AuthService {
     });
   }
 
-  async saveEmailVerificationOTPInTable(
+  async saveEmailVerificationOtpInTable(
     otp: number,
     userId: string,
   ): Promise<EmailOTP | undefined> {
     return this.emailOTPModel.create({
-      verificationOTP: otp,
+      verificationOtp: otp,
       userId,
     });
   }
@@ -77,7 +77,7 @@ export class AuthService {
     });
   }
 
-  async removeExpiredEmailVerificationOTPS() {
+  async removeExpiredEmailVerificationOtps() {
     const now = new Date();
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
