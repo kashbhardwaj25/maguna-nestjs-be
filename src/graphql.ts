@@ -41,7 +41,7 @@ export abstract class IMutation {
 
     abstract register(input?: Nullable<RegisterInput>): AuthResponse | Promise<AuthResponse>;
 
-    abstract verifyEmail(token?: Nullable<string>): string | Promise<string>;
+    abstract verifyEmail(otp?: Nullable<number>): string | Promise<string>;
 
     abstract resendVerificationEmail(): string | Promise<string>;
 }

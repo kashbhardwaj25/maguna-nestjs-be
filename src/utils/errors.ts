@@ -36,12 +36,12 @@ export class InvalidTokenProvided extends HttpException {
   }
 }
 
-export class EmailVerificationTokenExpired extends HttpException {
+export class EmailVerificationOTPExpired extends HttpException {
   constructor() {
     super(
       {
-        message: 'The email verification token has expired.',
-        code: 'EMAIL_VERIFICATION_TOKEN_EXPIRED',
+        message: 'The email verification OTP has expired.',
+        code: 'EMAIL_VERIFICATION_OTP_EXPIRED',
       },
       HttpStatus.BAD_REQUEST,
     );

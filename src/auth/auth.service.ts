@@ -1,19 +1,18 @@
 import { Op } from 'sequelize';
 import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 import { UsersService } from '../users/users.service';
-import { EmailToken } from 'src/models/email-token.model';
+import { EmailOTP } from 'src/models/email-otp.model';
 import { EmailService } from 'src/services/sendgrid.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(EmailToken)
-    private emailTokenModel: typeof EmailToken,
+    @InjectModel(EmailOTP)
+    private emailOTPModel: typeof EmailOTP,
     private jwtService: JwtService,
     private userService: UsersService,
     private emailService: EmailService,
@@ -35,56 +34,54 @@ export class AuthService {
     };
   }
 
-  async createVerificationToken() {
-    return uuidv4();
+  async createVerificationOTP() {
+    return Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
   }
 
-  async findOneByVerificationToken(
-    token: string,
-  ): Promise<EmailToken | undefined> {
-    return this.emailTokenModel.findOne({
-      where: { verificationToken: token },
+  async findOneByVerificationOTP(otp: number): Promise<EmailOTP | undefined> {
+    return this.emailOTPModel.findOne({
+      where: { verificationOTP: otp },
     });
   }
 
-  async findVerificationTokenByUserId(
+  async findVerificationOTPByUserId(
     userId: string,
-  ): Promise<EmailToken | undefined> {
-    return this.emailTokenModel.findOne({
+  ): Promise<EmailOTP | undefined> {
+    return this.emailOTPModel.findOne({
       where: { userId },
     });
   }
 
-  async saveEmailVerificationTokenInTable(
-    token: string,
+  async saveEmailVerificationOTPInTable(
+    otp: number,
     userId: string,
-  ): Promise<EmailToken | undefined> {
-    return this.emailTokenModel.create({
-      verificationToken: token,
+  ): Promise<EmailOTP | undefined> {
+    return this.emailOTPModel.create({
+      verificationOTP: otp,
       userId,
     });
   }
 
-  async sendVerificationEmail(email: string, token: string) {
+  async sendVerificationEmail(email: string, otp: number) {
     await this.emailService.sendEmail(
       email,
       'Verify your email.',
-      `<strong>Click this link to verify your email: http://localhost:3011/verify-email?token=${token}<strong>`,
+      `<strong>Use this OTP to verify your email: ${otp}`,
     );
   }
 
-  async removeEmailToken(condition = {}) {
-    return this.emailTokenModel.destroy({
+  async removeEmailOTP(condition = {}) {
+    return this.emailOTPModel.destroy({
       where: condition,
       force: true,
     });
   }
 
-  async removeExpiredEmailVerificationTokens() {
+  async removeExpiredEmailVerificationOTPS() {
     const now = new Date();
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
-    await this.emailTokenModel.destroy({
+    await this.emailOTPModel.destroy({
       where: {
         createdAt: {
           [Op.lt]: tenMinutesAgo,
