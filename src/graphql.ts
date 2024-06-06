@@ -23,6 +23,7 @@ export class User {
     id: string;
     name: string;
     email: string;
+    isEmailVerified: boolean;
 }
 
 export class AuthResponse {
