@@ -28,7 +28,7 @@ jobs:
             pkill node || true
 
             # Navigate to the app directory
-            cd /var/www/maguna-nestjs-be
+            cd /var/www/maguna-nestjs-be/maguna-nestjs-be
 
             # Pull the latest code from the repository
             git pull origin main
