@@ -1,4 +1,4 @@
-name: Deploy maguna-nestjs-be
+name: Deploy to EC2
 
 on:
   push:
@@ -10,51 +10,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install SSH client
-        run: sudo apt-get install -y openssh-client
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Create .env file
+        run: |
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
+          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> .env
+          echo "SENDGRID_FROM_ADDRESS=${{ secrets.SENDGRID_FROM_ADDRESS }}" >> .env
+          echo "DB_DIALECT=postgres" >> .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
 
       - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.EC2_KEY }}
-
-      - name: Debug Environment Variables
-        run: printenv
-
-      - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Ensure required packages are installed
-            sudo yum install -y git
-            sudo yum install -y nodejs npm
+          echo "${{ secrets.EC2_KEY }}" > /tmp/maguna_server.pem
+          chmod 600 /tmp/maguna_server.pem
+          ssh-add /tmp/maguna_server.pem
 
-            # Create the app directory if it doesn't exist
-            sudo mkdir -p /var/www/maguna-nestjs-be
-            sudo chown ec2-user:ec2-user /var/www/maguna-nestjs-be
+      - name: Transfer .env file
+        run: |
+          scp -i /tmp/maguna_server.pem .env ec2-user@${{ secrets.EC2_HOST }}:/var/www/maguna-nestjs-be/.env
 
-            # Navigate to the app directory
-            cd /var/www/maguna-nestjs-be/maguna-nestjs-be
-
-            # Stop any existing app instance
-            pkill node || true
-
-            # Pull the latest code from the repository
-            git pull origin main || git clone ${{ secrets.REPO_URL }} .
-
-            # Copy the .env file from the secrets
-            echo "${{ secrets.ENV_FILE }}" > .env
-
-            # Install dependencies
+      - name: Deploy application
+        run: |
+          ssh -i /tmp/maguna_server.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /var/www/maguna-nestjs-be
+            git pull origin main
             npm install
-
-            # Build the application
             npm run build
-
-            # Start the application
-            npm run start:prod
-
-            exit
+            pm2 restart all
           EOF
